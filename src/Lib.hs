@@ -1,4 +1,4 @@
-module S1
+module Lib
   ( myLast
   , myButLast
   , myElementAt
@@ -10,6 +10,10 @@ module S1
   , myCompress
   , myPack
   , myEncode
+  , EncodedListItem(Single, Multiple)
+  , myEncodeModified
+  , myDecodeModified
+  , myEncodeDirect
   ) where
 
 -- Problem 1
@@ -86,6 +90,7 @@ myIsPalindrome xs = xs == reverse xs
 data NestedList a
   = Elem a
   | List [NestedList a]
+  deriving Show
 
 myFlatten :: NestedList a -> [a]
 myFlatten (Elem x) = [x]
@@ -135,7 +140,77 @@ myPack (x':xs') = solve [[x']] xs'
 -- duplicates of elements are encoded as lists (N E) where N is the number of
 -- duplicates of the element E.
 --
+-- λ> encode "aaaabccaadeeee"
+-- [(4,'a'),(1,'b'),(2,'c'),(2,'a'),(1,'d'),(4,'e')]
+--
 --
 myEncode :: (Eq a) => [a] -> [(Int, a)]
 myEncode [] = []
 myEncode xs = [(length list, head list) | list <- myPack xs]
+
+-- Problem 11
+-- Modified run-length encoding.
+-- 
+-- Modify the result of problem 10 in such a way that if an element has no
+-- duplicates it is simply copied into the result list. Only elements with
+-- duplicates are transferred as (N E) lists.
+-- 
+-- λ> encodeModified "aaaabccaadeeee"
+-- [Multiple 4 'a',Single 'b',Multiple 2 'c',
+--  Multiple 2 'a',Single 'd',Multiple 4 'e']
+--
+--
+data EncodedListItem a
+  = Multiple Int a
+  | Single a
+  deriving (Show, Eq)
+
+myEncodeModified :: (Eq a) => [a] -> [EncodedListItem a]
+myEncodeModified xs = map makeEncodedList (myEncode xs)
+-- myEncodeModified = map makeEncodedList . myEncode
+  where makeEncodedList (1, x) = Single x
+        makeEncodedList (n, x) = Multiple n x
+
+-- Problem 12
+-- Decode a run-length encoded list.
+-- 
+-- Given a run-length code list generated as specified in problem 11. Construct
+-- its uncompressed version.
+-- 
+-- λ> decodeModified 
+--        [Multiple 4 'a',Single 'b',Multiple 2 'c',
+--         Multiple 2 'a',Single 'd',Multiple 4 'e']
+-- "aaaabccaadeeee"
+--
+--
+myDecodeModified :: [EncodedListItem a] -> [a]
+myDecodeModified xs = foldl (++) [] $ map decode xs
+  where decode (Single x) = [x]
+        decode (Multiple n x) = take n $ repeat x
+
+-- Problem 13
+-- Run-length encoding of a list (direct solution).
+--
+-- Implement the so-called run-length encoding data compression method
+-- directly. I.e. don't explicitly create the sublists containing the
+-- duplicates, as in problem 9, but only count them. As in problem P11,
+-- simplify the result list by replacing the singleton lists (1 X) by X.
+--
+-- (encode-direct '(a a a a b c c a a d e e e e))
+-- ; => ((4 A) B (2 C) (2 A) D (4 E))
+--
+--
+myEncodeDirect :: (Eq a) => [a] -> [EncodedListItem a]
+myEncodeDirect [] = []
+myEncodeDirect (x:xs) = map encode $ group [(1, x)] xs
+  where
+    group taken [] = taken
+    group taken (first:rest) =
+      let (num, val) = last taken
+       in group
+            (if val == first
+               then init taken ++ [(num + 1, val)]
+               else taken ++ [(1, first)])
+            rest
+    encode (1, x) = Single x
+    encode (n, x) = Multiple n x
