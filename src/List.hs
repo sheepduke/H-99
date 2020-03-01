@@ -21,7 +21,16 @@ module List
   , mySlice
   , myRotate
   , myRemoveAt
+  , myInsertAt
+  , myRange
+  , myRndSelect
+  , myDiffSelect
+  , myRndPermu
+  , myCombinations
   ) where
+
+import Data.List
+import qualified System.Random as R
 
 -- Problem 1
 -- Find the last element of a list.
@@ -301,3 +310,62 @@ myRemoveAt list@(x:xs) n
   | n <= 0 = list
   | n == 1 = xs
   | otherwise = x : myRemoveAt xs (n - 1)
+
+-- Problem 21
+-- Insert an element at a given position into a list.
+--
+--
+myInsertAt :: a -> [a] -> Int -> [a]
+myInsertAt x [] _ = [x]
+myInsertAt elm list@(x:xs) index
+  | index <= 1 = elm : list
+  | null xs = list ++ [elm]
+  | otherwise = x : myInsertAt elm xs (index - 1)
+
+-- Problem 22
+-- Create a list containing all integers within a given range.
+--
+--
+myRange :: Int -> Int -> [Int]
+myRange begin end = take (end - begin + 1) $ dropWhile (< begin) [1 ..]
+
+-- Problem 23
+-- Extract a given number of randomly selected elements from a list.
+--
+--
+myRndSelect :: [a] -> Int -> IO [a]
+myRndSelect [] _ = return []
+myRndSelect list n
+  | n <= 0 = return []
+  | n >= length list = do return list
+  | otherwise = do
+    let rangeEnd = length list - 1
+    gen <- R.newStdGen
+    return [list !! x | x <- take n $ nub $ R.randomRs (0, rangeEnd) gen]
+
+-- Problem 24
+-- Lotto: Draw N different random numbers from the set 1..M.
+--
+--
+myDiffSelect :: Int -> Int -> IO [Int]
+myDiffSelect count end = myRndSelect [1 .. end] count
+
+-- Problem 25
+-- Generate a random permutation of the elements of a list.
+--
+--
+myRndPermu :: [a] -> IO [a]
+myRndPermu list = do
+  lists <- myRndSelect (permutations list) 1
+  return (head lists)
+
+-- Problem 26
+-- Generate the combinations of K distinct objects chosen from the N elements of a list
+-- In how many ways can a committee of 3 be chosen from a group of 12 people?
+-- We all know that there are C(12,3) = 220 possibilities (C(N,K) denotes the
+-- well-known binomial coefficients). For pure mathematicians, this result may
+-- be great. But we want to really generate all the possibilities in a list.
+--
+--
+myCombinations :: Int -> [a] -> [[a]]
+myCombinations = error "Not implemented"

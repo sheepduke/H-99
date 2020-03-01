@@ -2,6 +2,7 @@ module ListSpec
   ( tests
   ) where
 
+import Data.List
 import List
 import Test.HUnit
 
@@ -110,7 +111,40 @@ tests =
     , "P19" ~: [3, 4, 5, 1, 2] ~=? myRotate [1, 2, 3, 4, 5] 2
     , "P19" ~: [4, 5, 1, 2, 3] ~=? myRotate [1, 2, 3, 4, 5] (-2)
     -- myRemoveAt
-    , "P19" ~: [2, 3, 4, 5] ~=? myRemoveAt [1, 2, 3, 4, 5] 1
-    , "P19" ~: [1, 2, 3, 5] ~=? myRemoveAt [1, 2, 3, 4, 5] 4
-    , "P19" ~: [1, 2, 3, 4] ~=? myRemoveAt [1, 2, 3, 4, 5] 5
+    , "P20" ~: [2, 3, 4, 5] ~=? myRemoveAt [1, 2, 3, 4, 5] 1
+    , "P20" ~: [1, 2, 3, 5] ~=? myRemoveAt [1, 2, 3, 4, 5] 4
+    , "P20" ~: [1, 2, 3, 4] ~=? myRemoveAt [1, 2, 3, 4, 5] 5
+    -- myInsert20
+    , "P21" ~: [1, 2, 3, 4] ~=? myInsertAt 4 [1, 2, 3] 4
+    , "P21" ~: [1, 2, 3, 4] ~=? myInsertAt 3 [1, 2, 4] 3
+    , "P21" ~: [1, 2, 3, 4] ~=? myInsertAt 1 [2, 3, 4] 1
+    -- myRange
+    , "P22" ~: [1, 2, 3] ~=? myRange 1 3
+    , "P22" ~: [4, 5, 6, 7] ~=? myRange 4 7
+    -- myRndSelect
+    , TestCase
+        (do let list = [1, 3, 5, 7, 9]
+                n = 3
+            result <- myRndSelect list n
+            assertBool "Should return N elements" (length result == n)
+            assertBool
+              "Should contain elements from list"
+              (all (`elem` list) result))
+    -- myDiffSelect
+    , TestCase
+        (do let count = 6
+                end = 49
+            result <- myDiffSelect count end
+            assertBool "Should return N elements" (length result == count)
+            assertBool
+              "Should contain elements in range"
+              (all (`elem` [1 .. end]) result))
+    -- myRndPermu
+    , TestCase
+        (do let list = [1, 2, 3, 4]
+            result <- myRndPermu list
+            assertEqual
+              "Result should equal to origin after both sorted"
+              (sort result)
+              (sort list))
     ]
