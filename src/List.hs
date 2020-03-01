@@ -1,4 +1,4 @@
-module Lib
+module List
   ( myLast
   , myButLast
   , myElementAt
@@ -14,6 +14,13 @@ module Lib
   , myEncodeModified
   , myDecodeModified
   , myEncodeDirect
+  , myDupli
+  , myRepli
+  , myDropEvery
+  , mySplit
+  , mySlice
+  , myRotate
+  , myRemoveAt
   ) where
 
 -- Problem 1
@@ -31,7 +38,7 @@ myLast (_:xs) = myLast xs
 --
 myButLast :: [a] -> Maybe a
 myButLast [] = Nothing
-myButLast [x] = Nothing
+myButLast [_] = Nothing
 myButLast (x:_:[]) = Just x
 myButLast (_:xs) = myButLast xs
 
@@ -90,7 +97,7 @@ myIsPalindrome xs = xs == reverse xs
 data NestedList a
   = Elem a
   | List [NestedList a]
-  deriving Show
+  deriving (Show)
 
 myFlatten :: NestedList a -> [a]
 myFlatten (Elem x) = [x]
@@ -119,7 +126,7 @@ myCompress (cur:rest) = solve cur rest
 -- Problem 9
 -- Pack consecutive duplicates of list elements into sublists. If a list
 -- contains repeated elements they should be placed in separate sublists.
--- 
+--
 -- In Lisp:
 --   (pack '(a a a a b c c a a d e e e e))
 --   ; => ((A A A A) (B) (C C) (A A) (D) (E E E E))
@@ -150,11 +157,11 @@ myEncode xs = [(length list, head list) | list <- myPack xs]
 
 -- Problem 11
 -- Modified run-length encoding.
--- 
+--
 -- Modify the result of problem 10 in such a way that if an element has no
 -- duplicates it is simply copied into the result list. Only elements with
 -- duplicates are transferred as (N E) lists.
--- 
+--
 -- λ> encodeModified "aaaabccaadeeee"
 -- [Multiple 4 'a',Single 'b',Multiple 2 'c',
 --  Multiple 2 'a',Single 'd',Multiple 4 'e']
@@ -167,17 +174,18 @@ data EncodedListItem a
 
 myEncodeModified :: (Eq a) => [a] -> [EncodedListItem a]
 myEncodeModified xs = map makeEncodedList (myEncode xs)
--- myEncodeModified = map makeEncodedList . myEncode
-  where makeEncodedList (1, x) = Single x
-        makeEncodedList (n, x) = Multiple n x
+  where
+    makeEncodedList (1, x) = Single x
+    makeEncodedList (n, x) = Multiple n x
 
+-- myEncodeModified = map makeEncodedList . myEncode
 -- Problem 12
 -- Decode a run-length encoded list.
--- 
+--
 -- Given a run-length code list generated as specified in problem 11. Construct
 -- its uncompressed version.
--- 
--- λ> decodeModified 
+--
+-- λ> decodeModified
 --        [Multiple 4 'a',Single 'b',Multiple 2 'c',
 --         Multiple 2 'a',Single 'd',Multiple 4 'e']
 -- "aaaabccaadeeee"
@@ -185,8 +193,9 @@ myEncodeModified xs = map makeEncodedList (myEncode xs)
 --
 myDecodeModified :: [EncodedListItem a] -> [a]
 myDecodeModified xs = foldl (++) [] $ map decode xs
-  where decode (Single x) = [x]
-        decode (Multiple n x) = take n $ repeat x
+  where
+    decode (Single x) = [x]
+    decode (Multiple n x) = take n $ repeat x
 
 -- Problem 13
 -- Run-length encoding of a list (direct solution).
@@ -214,3 +223,81 @@ myEncodeDirect (x:xs) = map encode $ group [(1, x)] xs
             rest
     encode (1, x) = Single x
     encode (n, x) = Multiple n x
+
+-- Problem 14
+-- Duplicate the elements of a list.
+--
+--
+myDupli :: [a] -> [a]
+myDupli [] = []
+myDupli (x:xs) = [x, x] ++ myDupli xs
+
+-- Problem 15
+-- Replicate the elements of a list a given number of times.
+--
+--
+myRepli :: [a] -> Int -> [a]
+myRepli [] _ = []
+myRepli (x:xs) n = (take n $ repeat x) ++ myRepli xs n
+
+-- Problem 16
+-- Drop every N'th element from a list.
+--
+--
+myDropEvery :: [a] -> Int -> [a]
+myDropEvery list n
+  | n <= 0 = list
+myDropEvery list initial = solve list initial
+  where
+    solve [] _ = []
+    solve (x:xs) 1 = solve xs initial
+    solve (x:xs) n = [x] ++ solve xs (n - 1)
+
+-- Problem 17
+-- Split a list into two parts; the length of the first part is given.
+-- Do not use any predefined predicates.
+--
+--
+mySplit :: [a] -> Int -> ([a], [a])
+mySplit list index
+  | index <= 0 = ([], list)
+mySplit [] _ = ([], [])
+mySplit (x:xs) n =
+  let result = mySplit xs (n - 1)
+   in (x : (fst result), snd result)
+
+-- Problem 18
+-- Extract a slice from a list.
+-- Given two indices, i and k, the slice is the list containing the elements
+-- between the i'th and k'th element of the original list (both limits
+-- included). Start counting the elements with 1.
+--
+--
+mySlice :: [a] -> Int -> Int -> [a]
+mySlice [] _ _ = []
+mySlice (x:xs) begin end
+  | begin > 1 = mySlice xs (begin - 1) (end - 1)
+  | end == 0 = []
+  | otherwise = x : mySlice xs 1 (end - 1)
+
+-- Problem 19
+-- Rotate a list N places to the left.
+--
+--
+myRotate :: [a] -> Int -> [a]
+myRotate [] _ = []
+myRotate list@(x:xs) n
+  | n == 0 = list
+  | n > 0 = myRotate (xs ++ [x]) (n - 1)
+  | n < 0 = myRotate (last list : x : init xs) (n + 1)
+
+-- Problem 20
+-- Remove the K'th element from a list.
+--
+--
+myRemoveAt :: [a] -> Int -> [a]
+myRemoveAt [] _ = []
+myRemoveAt list@(x:xs) n
+  | n <= 0 = list
+  | n == 1 = xs
+  | otherwise = x : myRemoveAt xs (n - 1)
