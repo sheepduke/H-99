@@ -368,4 +368,9 @@ myRndPermu list = do
 --
 --
 myCombinations :: Int -> [a] -> [[a]]
-myCombinations = error "Not implemented"
+myCombinations 0 _ = [[]]
+myCombinations count list =
+  [ first : subResult
+  | first:rest <- tails list
+  , subResult <- myCombinations (count - 1) rest
+  ]
