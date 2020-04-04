@@ -147,4 +147,9 @@ tests =
               "Result should equal to origin after both sorted"
               (sort result)
               (sort list))
+    -- myLsort
+    , "P28-a" ~: ["a", "bc", "abc", "def"] ~=? myLsort ["abc", "a", "bc", "def"]
+    -- myLfsort
+    , "P28-b" ~: ["abcde", "abc", "bcd", "ab", "cd", "ef"] ~=?
+      myLfsort ["ab", "abc", "cd", "bcd", "ef", "abcde"]
     ]

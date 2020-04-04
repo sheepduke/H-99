@@ -27,6 +27,9 @@ module List
   , myDiffSelect
   , myRndPermu
   , myCombinations
+  , myGroup
+  , myLsort
+  , myLfsort
   ) where
 
 import Data.List
@@ -374,3 +377,54 @@ myCombinations count list =
   | first:rest <- tails list
   , subResult <- myCombinations (count - 1) rest
   ]
+
+-- Problem 27
+-- Group the elements of a set into disjoint subsets.
+-- a) In how many ways can a group of 9 people work in 3 disjoint subgroups of
+-- 2, 3 and 4 persons? Write a function that generates all the possibilities
+-- and returns them in a list.
+--
+--
+myGroup :: [Int] -> [a] -> [[[a]]]
+myGroup counts list
+  | sum counts /= length list = error "Counts provided does not match"
+
+-- Problem 28 (a)
+-- Sorting a list of lists according to length of sublists.
+-- We suppose that a list contains elements that are lists themselves. The
+-- objective is to sort the elements of this list according to their
+-- length. E.g. short lists first, longer lists later, or vice versa.
+--
+--
+myLsort :: [[a]] -> [[a]]
+myLsort list =
+  map fst . sortBy (\x y -> compare (snd x) (snd y)) . map (\x -> (x, length x)) $
+  list
+
+-- Problem 28 (b)
+-- Again, we suppose that a list contains elements that are lists
+-- themselves. But this time the objective is to sort the elements of this list
+-- according to their length frequency; i.e., in the default, where sorting is
+-- done ascendingly, lists with rare lengths are placed first, others with a
+-- more frequent length come later.
+--
+--
+myLfsort :: [[a]] -> [[a]]
+myLfsort list =
+  let listsWithLength = map (\x -> (x, length x)) $ list
+      lengthList = map snd listsWithLength
+      listWithFrequency =
+        map (\(elm, len) -> (elm, count len lengthList)) listsWithLength
+   in map fst . sortBy (\(_, freq1) (_, freq2) -> compare freq1 freq2) $
+      listWithFrequency
+  where
+    count :: (Eq a) => a -> [a] -> Int
+    count elm lst =
+      foldl
+        (\acc x ->
+           acc +
+           if x == elm
+             then 1
+             else 0)
+        0
+        lst
