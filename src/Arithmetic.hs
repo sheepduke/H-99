@@ -5,6 +5,9 @@ module Arithmetic
   , myTotient
   , myPrimeFactors
   , myPrimeFactorsMult
+  , myPrimesR
+  , myGoldbach
+  , myGoldbachList
   ) where
 
 import Data.List
@@ -86,3 +89,49 @@ myPrimeFactorsMult :: Int -> [(Int, Int)]
 myPrimeFactorsMult 1 = []
 myPrimeFactorsMult num =
   map (\x -> (head x, length x)) . group $ myPrimeFactors num
+
+-- Problem 39
+-- A list of prime numbers.
+-- Given a range of integers by its lower and upper limit, construct a list of all prime numbers in that range.
+-- Example in Haskell:
+-- λ> primesR 10 20
+-- [11,13,17,19]
+--
+--
+myPrimesR :: Int -> Int -> [Int]
+myPrimesR begin end = filter myIsPrime [begin .. end]
+
+-- Problem 40
+-- Goldbach's conjecture.
+-- Goldbach's conjecture says that every positive even number greater than 2 is
+-- the sum of two prime numbers. Example: 28 = 5 + 23. It is one of the most
+-- famous facts in number theory that has not been proved to be correct in the
+-- general case. It has been numerically confirmed up to very large numbers
+-- (much larger than we can go with our Prolog system). Write a predicate to
+-- find the two prime numbers that sum up to a given even integer.
+-- Example:
+-- λ> goldbach 28
+-- (5, 23)
+--
+--
+myGoldbach :: Int -> (Int, Int)
+myGoldbach num =
+  let first =
+        head . filter (\x -> myIsPrime x && myIsPrime (num - x)) $ [2 .. num]
+   in (first, num - first)
+
+-- Problem 41
+-- Given a range of integers by its lower and upper limit, print a list of all
+-- even numbers and their Goldbach composition.
+-- In most cases, if an even number is written as the sum of two prime numbers,
+-- one of them is very small. Very rarely, the primes are both bigger than say
+-- 50. Try to find out how many such cases there are in the range 2..3000.
+-- Example:
+-- λ> goldbachList 9 20
+-- [(3,7),(5,7),(3,11),(3,13),(5,13),(3,17)]
+-- λ> goldbachList' 4 2000 50
+-- [(73,919),(61,1321),(67,1789),(61,1867)]
+--
+--
+myGoldbachList :: Int -> Int -> [(Int, Int)]
+myGoldbachList begin end = map myGoldbach . filter even $ [begin .. end]

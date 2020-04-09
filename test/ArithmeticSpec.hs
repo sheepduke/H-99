@@ -17,4 +17,8 @@ tests =
   , "P34" ~: 4 ~=? myTotient 10
   , "P35" ~: [3, 3, 5, 7] ~=? myPrimeFactors 315
   , "P36" ~: [(3, 2), (5, 1), (7, 1)] ~=? myPrimeFactorsMult 315
+  , "P39" ~: [11, 13, 17, 19] ~=? myPrimesR 10 20
+  , "P40" ~: (5, 23) ~=? myGoldbach 28
+  , "P41" ~: [(3, 7), (5, 7), (3, 11), (3, 13), (5, 13), (3, 17)] ~=?
+    myGoldbachList 9 20
   ]
